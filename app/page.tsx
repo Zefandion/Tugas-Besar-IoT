@@ -15,10 +15,10 @@ interface NodeData {
 
 export default function Dashboard() {
   const [nodes, setNodes] = useState<NodeData[]>([
-    { id: 99, val: 0.0, battery: 100 }, // Pastikan ID 99 ada
+    { id: 1, val: 0.0, battery: 100 }, // Pastikan ID 99 ada
     { id: 2, val: 0.0, battery: 100 },
     { id: 3, val: 0.0, battery: 100 },
-    { id: 4, val: 0.0, battery: 100 },
+    
   ]);
 
   const [chartData, setChartData] = useState<ChartData<'line'>>({
@@ -48,16 +48,26 @@ export default function Dashboard() {
       if (!Array.isArray(data)) return;
 
       const now = new Date().toLocaleTimeString();
-      let node99Value = 0; // Ubah variabel jadi node99Value biar jelas
+      //let node99Value = 0; // Ubah variabel jadi node99Value biar jelas
+      const nodeValues: Record<number, number> = {};
+      const latestByNode: Record<number, number> = {};
+
+      data.forEach((row: any) => {
+        latestByNode[row.node_id] = parseFloat(row.magnitude_g);
+      });
 
       setNodes((prevNodes) => prevNodes.map(node => {
         // Cari data di DB yang node_id nya sama dengan node.id di state
         const reading = data.find((row: any) => row.node_id === node.id);
         
         // Gunakan nilai dari DB, jika tidak ada pakai nilai lama
-        const newVal = reading ? parseFloat(reading.magnitude_g) : node.val;
+        const newVal = latestByNode[node.id] ?? node.val;
         
-        if (node.id === 99) node99Value = newVal;
+        //if (node.id === 99) node99Value = newVal;
+        if (reading) {
+          nodeValues[node.id] = newVal;
+        }
+
 
         return {
           ...node,
@@ -65,17 +75,45 @@ export default function Dashboard() {
           battery: Math.max(0, node.battery - 0.01) 
         };
       }));
+      if (Object.keys(latestByNode).length === 0) return;
 
       setChartData((prev) => {
-        const newLabels = [...(prev.labels as string[]), now].slice(-15);
-        const oldData = prev.datasets[0].data as number[];
-        const newData = [...oldData, node99Value].slice(-15);
-        
-        return {
-          labels: newLabels,
-          datasets: [{ ...prev.datasets[0], data: newData }]
-        };
-      });
+  const labels = [...(prev.labels as string[]), now].slice(-10);
+
+  const getData = (index: number, id: number) =>
+    [
+      ...(prev.datasets[index]?.data as number[] ?? []),
+      nodeValues[id] ?? 0,
+    ].slice(-10);
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Node 1',
+        data: getData(0, 1),
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.5)',
+        tension: 0.4,
+      },
+      {
+        label: 'Node 2',
+        data: getData(1, 2),
+        borderColor: '#22c55e',
+        backgroundColor: 'rgba(34,197,94,0.5)',
+        tension: 0.4,
+      },
+      {
+        label: 'Node 3',
+        data: getData(2, 3),
+        borderColor: '#f97316',
+        backgroundColor: 'rgba(249,115,22,0.5)',
+        tension: 0.4,
+      },
+    ],
+  };
+});
+
 
     } catch (err) {
       console.error("Error Fetching:", err);
@@ -84,19 +122,19 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 2000);
+    const interval = setInterval(fetchData, 500);
     return () => clearInterval(interval);
   }, []);
 
   const getStatusColor = (val: number) => {
-    if (val < 0.11) return "bg-green-500";
-    if (val <= 0.30) return "bg-yellow-500";
+    if (val < 0.02) return "bg-green-500";
+    if (val <= 0.03) return "bg-yellow-500";
     return "bg-red-500 animate-pulse";
   };
 
   const getStatusText = (val: number) => {
-    if (val < 0.11) return "Rendah";
-    if (val <= 0.30) return "Sedang";
+    if (val < 0.02) return "Rendah";
+    if (val <= 0.03) return "Sedang";
     return "Tinggi";
   };
 
@@ -134,7 +172,7 @@ export default function Dashboard() {
             </div>
 
             <div className="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 flex flex-col">
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Grafik Akselerasi (Node 99)</h3>
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Grafik Akselerasi (Node 1, 2, 3)</h3>
             <div className="flex-1 w-full h-full">
                 <Line 
                     data={chartData} 

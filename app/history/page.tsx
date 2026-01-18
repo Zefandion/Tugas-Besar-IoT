@@ -54,8 +54,8 @@ export default function RiwayatPage() {
 
   // Helper Status Warna & Teks (Sama seperti Dashboard)
   const getStatusInfo = (val: number) => {
-    if (val < 0.11) return { text: "Aman", color: "bg-green-500 text-white" };
-    if (val <= 0.30) return { text: "Sedang", color: "bg-yellow-500 text-black" };
+    if (val < 0.02) return { text: "Aman", color: "bg-green-500 text-white" };
+    if (val <= 0.03) return { text: "Sedang", color: "bg-yellow-500 text-black" };
     return { text: "Bahaya", color: "bg-red-500 text-white" };
   };
 
