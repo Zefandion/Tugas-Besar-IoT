@@ -52,8 +52,20 @@ export default function Dashboard() {
       const nodeValues: Record<number, number> = {};
       const latestByNode: Record<number, number> = {};
 
+      // data.forEach((row: any) => {
+      //   latestByNode[row.node_id] = parseFloat(row.magnitude_g);
+      // });
+
       data.forEach((row: any) => {
-        latestByNode[row.node_id] = parseFloat(row.magnitude_g);
+        const ms2 = Number(row.magnitude_ms2);
+        const g   = Number(row.magnitude_g);
+
+        if (Number.isFinite(ms2)) {
+          latestByNode[row.node_id] = ms2;
+        } else if (Number.isFinite(g)) {
+          // fallback kalau ms2 belum ada
+          latestByNode[row.node_id] = g * 9.80665;
+        }
       });
 
       setNodes((prevNodes) => prevNodes.map(node => {
@@ -126,17 +138,30 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  // const getStatusColor = (val: number) => {
+  //   if (val < 0.02) return "bg-green-500";
+  //   if (val <= 0.03) return "bg-yellow-500";
+  //   return "bg-red-500 animate-pulse";
+  // };
+
+  // const getStatusText = (val: number) => {
+  //   if (val < 0.02) return "Rendah";
+  //   if (val <= 0.03) return "Sedang";
+  //   return "Tinggi";
+  // };
+
   const getStatusColor = (val: number) => {
-    if (val < 0.02) return "bg-green-500";
-    if (val <= 0.03) return "bg-yellow-500";
+    if (val < 0.2) return "bg-green-500";
+    if (val <= 0.3) return "bg-yellow-500";
     return "bg-red-500 animate-pulse";
   };
 
   const getStatusText = (val: number) => {
-    if (val < 0.02) return "Rendah";
-    if (val <= 0.03) return "Sedang";
+    if (val < 0.2) return "Rendah";
+    if (val <= 0.3) return "Sedang";
     return "Tinggi";
   };
+
 
   return (
     <div>
@@ -145,7 +170,6 @@ export default function Dashboard() {
               <h2 className="text-3xl font-bold text-white">Monitoring Mikrozonasi</h2>
               <p className="text-slate-400">Data Real-time dari Rooftop Gedung 9</p>
             </div>
-             <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm transition">Download Report (.CSV)</button>
         </header>
 
          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -160,19 +184,31 @@ export default function Dashboard() {
                 {nodes.map((node) => (
                 <div key={node.id} className={`${getStatusColor(node.val)} rounded-lg flex flex-col items-center justify-center p-4 text-slate-900 transition-colors duration-500`}>
                     <div className="flex justify-between w-full mb-2 px-2">
-                    <span className="font-bold text-sm">Node {node.id}</span>
-                    <span className="text-xs opacity-80">🔋 {Math.floor(node.battery)}%</span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`w-3 h-3 rounded-full border-2 border-slate-900 ${
+                          node.id === 1
+                            ? 'bg-blue-500'
+                            : node.id === 2
+                            ? 'bg-green-500'
+                            : 'bg-orange-500'
+                        }`}
+                      />
+                      <span className="font-bold text-sm">Node {node.id}</span>
+                    </div>
+                    {/* <span className="font-bold text-sm">Node {node.id}</span> */}
+                    {/* <span className="text-xs opacity-80">🔋 {Math.floor(node.battery)}%</span> */}
                     </div>
                     {/* Tampilkan 2 angka di belakang koma saja agar rapi */}
                     <span className="text-4xl font-mono font-bold">{node.val.toFixed(2)}</span>
-                    <span className="text-xs font-semibold uppercase mt-1">{getStatusText(node.val)} (g)</span>
+                    <span className="text-xs font-semibold mt-1">{getStatusText(node.val)} (m/s²)</span>
                 </div>
                 ))}
             </div>
             </div>
 
             <div className="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700 flex flex-col">
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Grafik Akselerasi (Node 1, 2, 3)</h3>
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Grafik Akselerasi</h3>
             <div className="flex-1 w-full h-full">
                 <Line 
                     data={chartData} 
