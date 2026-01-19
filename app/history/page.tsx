@@ -1,7 +1,6 @@
 "use client";
 import { useState } from 'react';
 
-// Interface sesuai kolom database
 interface LogData {
   id: number;
   node_id: number;
@@ -14,19 +13,16 @@ interface LogData {
 }
 
 export default function RiwayatPage() {
-  // State untuk menyimpan tanggal dan data
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [logs, setLogs] = useState<LogData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fungsi Fetch Data ke API
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      // Panggil API dengan parameter tanggal
       const url = selectedDate 
         ? `/api/logs?date=${selectedDate}` 
-        : '/api/logs'; // Kalau kosong ambil default
+        : '/api/logs';
       
       const res = await fetch(url);
       const data = await res.json();
@@ -44,7 +40,6 @@ export default function RiwayatPage() {
     }
   };
 
-  // Helper untuk format tanggal agar enak dibaca
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
     return date.toLocaleString('id-ID', {
@@ -53,12 +48,6 @@ export default function RiwayatPage() {
     });
   };
 
-  // Helper Status Warna & Teks (Sama seperti Dashboard)
-  // const getStatusInfo = (val: number) => {
-  //   if (val < 0.02) return { text: "Aman", color: "bg-green-500 text-white" };
-  //   if (val <= 0.03) return { text: "Sedang", color: "bg-yellow-500 text-black" };
-  //   return { text: "Bahaya", color: "bg-red-500 text-white" };
-  // };
   const getStatusInfo = (val: number) => {
     if (val < 0.2) return { text: "Aman", color: "bg-green-500 text-white" };
     if (val <= 0.3) return { text: "Sedang", color: "bg-yellow-500 text-black" };
@@ -109,7 +98,6 @@ export default function RiwayatPage() {
             <tbody className="divide-y divide-slate-700">
               {logs.length > 0 ? (
                 logs.map((log) => {
-                  // const status = getStatusInfo(log.magnitude_g);
                   const status = getStatusInfo(log.magnitude_ms2);
                   return (
                     <tr key={log.id} className="hover:bg-slate-700/50 transition">

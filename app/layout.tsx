@@ -32,13 +32,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
             </Link>
             
           </nav>
-
-          {/* <div className="absolute bottom-0 w-full p-6">
-             <div className="bg-slate-700 p-3 rounded text-xs">
-               <p>Status:  Online</p>
-               <p className="mt-1">ZigBee Gateway: Active</p>
-             </div>
-          </div> */}
         </aside>
 
         {/* KONTEN UTAMA */}

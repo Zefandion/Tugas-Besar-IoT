@@ -15,9 +15,9 @@ interface NodeData {
 
 export default function Dashboard() {
   const [nodes, setNodes] = useState<NodeData[]>([
-    { id: 1, val: 0.0, battery: 100 }, // Pastikan ID 99 ada
+    { id: 1, val: 0.0, battery: 100 }, 
     { id: 2, val: 0.0, battery: 100 },
-    { id: 3, val: 0.0, battery: 100 },
+    { id: 6, val: 0.0, battery: 100 },
     
   ]);
 
@@ -36,57 +36,44 @@ export default function Dashboard() {
     try {
       const response = await fetch('/api/sensors');
       
-      // Cek jika API Error
       if (!response.ok) {
         console.error("Gagal koneksi API:", response.status, response.statusText);
         return;
       }
 
       const data = await response.json();
-       console.log("Data API:", data); // Uncomment untuk debug
-
       if (!Array.isArray(data)) return;
 
       const now = new Date().toLocaleTimeString();
-      //let node99Value = 0; // Ubah variabel jadi node99Value biar jelas
       const nodeValues: Record<number, number> = {};
       const latestByNode: Record<number, number> = {};
-
-      // data.forEach((row: any) => {
-      //   latestByNode[row.node_id] = parseFloat(row.magnitude_g);
-      // });
 
       data.forEach((row: any) => {
         const ms2 = Number(row.magnitude_ms2);
         const g   = Number(row.magnitude_g);
 
         if (Number.isFinite(ms2)) {
-          latestByNode[row.node_id] = ms2;
+          const mappedId = row.node_id === 3 ? 6 : row.node_id;
+          latestByNode[mappedId] = ms2;
         } else if (Number.isFinite(g)) {
-          // fallback kalau ms2 belum ada
           latestByNode[row.node_id] = g * 9.80665;
         }
       });
 
-      setNodes((prevNodes) => prevNodes.map(node => {
-        // Cari data di DB yang node_id nya sama dengan node.id di state
-        const reading = data.find((row: any) => row.node_id === node.id);
-        
-        // Gunakan nilai dari DB, jika tidak ada pakai nilai lama
-        const newVal = latestByNode[node.id] ?? node.val;
-        
-        //if (node.id === 99) node99Value = newVal;
-        if (reading) {
+      setNodes((prevNodes) =>
+        prevNodes.map(node => {
+          const newVal = latestByNode[node.id] ?? node.val;
+
           nodeValues[node.id] = newVal;
-        }
 
+          return {
+            ...node,
+            val: newVal,
+            battery: Math.max(0, node.battery - 0.01),
+          };
+        })
+      );  
 
-        return {
-          ...node,
-          val: newVal,
-          battery: Math.max(0, node.battery - 0.01) 
-        };
-      }));
       if (Object.keys(latestByNode).length === 0) return;
 
       setChartData((prev) => {
@@ -116,8 +103,8 @@ export default function Dashboard() {
         tension: 0.4,
       },
       {
-        label: 'Node 3',
-        data: getData(2, 3),
+        label: 'Node 6',
+        data: getData(2, 6),
         borderColor: '#f97316',
         backgroundColor: 'rgba(249,115,22,0.5)',
         tension: 0.4,
@@ -138,30 +125,35 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // const getStatusColor = (val: number) => {
-  //   if (val < 0.02) return "bg-green-500";
-  //   if (val <= 0.03) return "bg-yellow-500";
-  //   return "bg-red-500 animate-pulse";
-  // };
-
-  // const getStatusText = (val: number) => {
-  //   if (val < 0.02) return "Rendah";
-  //   if (val <= 0.03) return "Sedang";
-  //   return "Tinggi";
-  // };
-
   const getStatusColor = (val: number) => {
-    if (val < 0.2) return "bg-green-500";
-    if (val <= 0.3) return "bg-yellow-500";
-    return "bg-red-500 animate-pulse";
+    if (val === 0) return "bg-slate-500";     
+    if (val < 0.2) return "bg-green-500";    
+    if (val <= 0.3) return "bg-yellow-500";    
+    return "bg-red-500 animate-pulse";        
   };
 
   const getStatusText = (val: number) => {
+    if (val === 0) return "Tidak Aktif";
     if (val < 0.2) return "Rendah";
     if (val <= 0.3) return "Sedang";
     return "Tinggi";
   };
 
+  const TOTAL_SLOTS = 10;
+  const slots = Array.from({ length: TOTAL_SLOTS }, (_, i) => i + 1);
+
+  const nodeColors: Record<number, string> = {
+    1: 'bg-blue-500',
+    2: 'bg-green-500',
+    3: 'bg-orange-500',
+    4: 'bg-purple-500',
+    5: 'bg-pink-500',
+    6: 'bg-red-500',
+    7: 'bg-yellow-500',
+    8: 'bg-teal-500',
+    9: 'bg-indigo-500',
+    10: 'bg-cyan-500',
+  };
 
   return (
     <div>
@@ -172,38 +164,43 @@ export default function Dashboard() {
             </div>
         </header>
 
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+         <div className="flex flex-col gap-6 mb-8">
             <div className="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
             <h3 className="text-lg font-semibold mb-4 text-blue-400">Peta Visualisasi Zona</h3>
-            <div className="grid grid-cols-2 gap-4 aspect-video relative bg-slate-900 p-4 rounded-lg">
+              <div className="grid grid-cols-5 grid-rows-2 gap-4 bg-slate-900 p-4 rounded-lg">
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-xl border-4 border-slate-800">
-                    <span className="font-bold text-xs">SINK</span>
                 </div>
-                </div>
-                {nodes.map((node) => (
-                <div key={node.id} className={`${getStatusColor(node.val)} rounded-lg flex flex-col items-center justify-center p-4 text-slate-900 transition-colors duration-500`}>
-                    <div className="flex justify-between w-full mb-2 px-2">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`w-3 h-3 rounded-full border-2 border-slate-900 ${
-                          node.id === 1
-                            ? 'bg-blue-500'
-                            : node.id === 2
-                            ? 'bg-green-500'
-                            : 'bg-orange-500'
-                        }`}
-                      />
-                      <span className="font-bold text-sm">Node {node.id}</span>
+                {slots.map((slotId) => {
+                  const node = nodes.find(n => n.id === slotId);
+                  const value = node ? node.val : 0.0;
+
+                  return (
+                    <div
+                      key={slotId}
+                      className={`${getStatusColor(value)} rounded-lg flex flex-col items-center justify-center p-4 text-slate-900 transition-colors duration-500`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className={`w-3 h-3 rounded-full border-2 border-slate-900 ${
+                            nodeColors[slotId] ?? 'bg-slate-300'
+                          }`}
+                        />
+                        <span className="font-bold text-sm">Node {slotId}</span>
+                      </div>
+
+                      <span className="text-4xl font-mono font-bold">
+                        {value.toFixed(2)}
+                      </span>
+
+                      <span className="text-xs font-semibold mt-1">
+                        {value === 0
+                          ? "Tidak Aktif"
+                          : `${getStatusText(value)} (m/s²)`
+                        }
+                      </span>
                     </div>
-                    {/* <span className="font-bold text-sm">Node {node.id}</span> */}
-                    {/* <span className="text-xs opacity-80">🔋 {Math.floor(node.battery)}%</span> */}
-                    </div>
-                    {/* Tampilkan 2 angka di belakang koma saja agar rapi */}
-                    <span className="text-4xl font-mono font-bold">{node.val.toFixed(2)}</span>
-                    <span className="text-xs font-semibold mt-1">{getStatusText(node.val)} (m/s²)</span>
-                </div>
-                ))}
+                  );
+                })}
             </div>
             </div>
 
@@ -216,7 +213,6 @@ export default function Dashboard() {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        // FIX: Hapus Max 0.5 agar grafik bisa naik tinggi
                         y: { beginAtZero: true, grid: { color: '#334155' } },
                         x: { grid: { display: false } }
                     },
