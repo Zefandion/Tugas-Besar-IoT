@@ -9,6 +9,7 @@ interface LogData {
   y_g: number;
   z_g: number;
   magnitude_g: number;
+  magnitude_ms2: number;
   created_at: string;
 }
 
@@ -53,11 +54,17 @@ export default function RiwayatPage() {
   };
 
   // Helper Status Warna & Teks (Sama seperti Dashboard)
+  // const getStatusInfo = (val: number) => {
+  //   if (val < 0.02) return { text: "Aman", color: "bg-green-500 text-white" };
+  //   if (val <= 0.03) return { text: "Sedang", color: "bg-yellow-500 text-black" };
+  //   return { text: "Bahaya", color: "bg-red-500 text-white" };
+  // };
   const getStatusInfo = (val: number) => {
-    if (val < 0.11) return { text: "Aman", color: "bg-green-500 text-white" };
-    if (val <= 0.30) return { text: "Sedang", color: "bg-yellow-500 text-black" };
+    if (val < 0.2) return { text: "Aman", color: "bg-green-500 text-white" };
+    if (val <= 0.3) return { text: "Sedang", color: "bg-yellow-500 text-black" };
     return { text: "Bahaya", color: "bg-red-500 text-white" };
   };
+
 
   return (
     <div className="p-8">
@@ -95,14 +102,15 @@ export default function RiwayatPage() {
                 <th className="px-6 py-4">X (g)</th>
                 <th className="px-6 py-4">Y (g)</th>
                 <th className="px-6 py-4">Z (g)</th>
-                <th className="px-6 py-4">Total (g)</th>
+                <th className="px-6 py-4">Total (m/s²)</th>
                 <th className="px-6 py-4">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
               {logs.length > 0 ? (
                 logs.map((log) => {
-                  const status = getStatusInfo(log.magnitude_g);
+                  // const status = getStatusInfo(log.magnitude_g);
+                  const status = getStatusInfo(log.magnitude_ms2);
                   return (
                     <tr key={log.id} className="hover:bg-slate-700/50 transition">
                       <td className="px-6 py-4 font-mono text-sm text-white">
@@ -113,7 +121,9 @@ export default function RiwayatPage() {
                       <td className="px-6 py-4 text-xs font-mono">{log.y_g.toFixed(2)}</td>
                       <td className="px-6 py-4 text-xs font-mono">{log.z_g.toFixed(2)}</td>
                       <td className="px-6 py-4 font-bold text-white font-mono">
-                        {log.magnitude_g.toFixed(2)}
+                        {Number.isFinite(log.magnitude_ms2)
+                        ? log.magnitude_ms2.toFixed(2)
+                        : '--'}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded text-xs font-bold ${status.color}`}>

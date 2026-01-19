@@ -25,22 +25,20 @@ export default function RootLayout({ children }: RootLayoutProps) {
           
           <nav className="px-4 space-y-2">
             <Link href="/" className="block p-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-3">
-               <span>Dashboard Real-time</span>
+               <span>Dashboard</span>
             </Link>
             <Link href="/history" className="block p-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-3">
                <span>Riwayat Data</span>
             </Link>
-            <div className="block p-3 rounded-lg text-slate-500 cursor-not-allowed flex items-center gap-3">
-               <span>Pengaturan (Demo)</span>
-            </div>
+            
           </nav>
 
-          <div className="absolute bottom-0 w-full p-6">
+          {/* <div className="absolute bottom-0 w-full p-6">
              <div className="bg-slate-700 p-3 rounded text-xs">
                <p>Status:  Online</p>
                <p className="mt-1">ZigBee Gateway: Active</p>
              </div>
-          </div>
+          </div> */}
         </aside>
 
         {/* KONTEN UTAMA */}
