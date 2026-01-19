@@ -12,7 +12,7 @@ export async function GET() {
         magnitude_g, 
         created_at 
       FROM sensor_readings 
-      WHERE node_id IN (1, 2, 3, 4)
+      WHERE node_id IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 99)
       ORDER BY node_id, created_at DESC;
     `;
     
