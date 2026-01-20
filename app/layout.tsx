@@ -20,7 +20,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <aside className="w-64 bg-slate-800 border-r border-slate-700 flex-shrink-0 fixed h-full overflow-y-auto">
           <div className="p-6">
             <h1 className="text-xl font-bold text-blue-400 mb-1">WSN Microzonation</h1>
-            <p className="text-xs text-slate-400">Gedung 9 UNPAR</p>
+            <p className="text-xs text-slate-400">Gedung 10 UNPAR</p>
           </div>
           
           <nav className="px-4 space-y-2">

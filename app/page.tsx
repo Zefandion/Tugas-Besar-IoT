@@ -160,13 +160,32 @@ export default function Dashboard() {
         <header className="flex justify-between items-end mb-8">
             <div>
               <h2 className="text-3xl font-bold text-white">Monitoring Mikrozonasi</h2>
-              <p className="text-slate-400">Data Real-time dari Rooftop Gedung 9</p>
+              <p className="text-slate-400">Data Real-time dari Rooftop Gedung 10</p>
             </div>
         </header>
-
+        
          <div className="flex flex-col gap-6 mb-8">
             <div className="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Peta Visualisasi Zona</h3>
+            <h3 className="flex items-center gap-2 text-lg font-semibold mb-4 text-blue-400">
+              <span>Peta Visualisasi Zona</span>
+              <img 
+                src="/north.png" 
+                alt="Arah Utara" 
+                className="w-13 h-13"
+              />
+            </h3>
+
+              <div className="w-full bg-slate-400 text-slate-900 font-bold py-3 mb-4">
+                <div className="flex items-center justify-center gap-3">
+                  <img 
+                    src="/building.png" 
+                    alt="Gedung" 
+                    className="w-7 h-7"
+                  />
+                  <span className="tracking-wide">GEDUNG 10</span>
+                </div>
+              </div>
+
               <div className="grid grid-cols-5 grid-rows-2 gap-4 bg-slate-900 p-4 rounded-lg">
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
                 </div>
